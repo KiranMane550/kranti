@@ -8,91 +8,83 @@
 <style>
 body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #ff758c, #ff7eb3);
-  color: white;
-  overflow: hidden;
-  text-align: center;
-}
-
-/* screens */
-.screen {
-  position: absolute;
-  width: 100%;
-  height: 100%;
+  font-family: 'Poppins', sans-serif;
+  height: 100vh;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  transition: opacity 1s;
+  overflow: hidden;
+  background: linear-gradient(-45deg, #ff758c, #ff7eb3, #fad0c4, #ffdde1);
+  background-size: 400% 400%;
+  animation: gradient 10s ease infinite;
 }
-.hidden { opacity: 0; pointer-events: none; }
-.visible { opacity: 1; }
 
-/* text */
-h1 { font-size: 2.5rem; }
-p { font-size: 1.4rem; max-width: 80%; }
+@keyframes gradient {
+  0% {background-position: 0% 50%;}
+  50% {background-position: 100% 50%;}
+  100% {background-position: 0% 50%;}
+}
 
-/* buttons */
+.card {
+  width: 90%;
+  max-width: 400px;
+  padding: 30px;
+  border-radius: 20px;
+  backdrop-filter: blur(15px);
+  background: rgba(255,255,255,0.15);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  text-align: center;
+  color: white;
+  transition: 0.6s;
+}
+
+.hidden { display: none; }
+
+h1 { font-size: 2rem; margin-bottom: 10px; }
+p { font-size: 1.2rem; opacity: 0.9; }
+
 button {
   margin-top: 20px;
-  padding: 12px 25px;
-  font-size: 1.1rem;
+  padding: 12px 20px;
+  border-radius: 30px;
   border: none;
-  border-radius: 8px;
+  font-size: 1rem;
   cursor: pointer;
-}
-.yes { background: #28a745; color: white; }
-.no { background: #dc3545; color: white; position: absolute; }
-
-/* typing */
-.typing {
-  border-right: 2px solid white;
-  white-space: nowrap;
-  overflow: hidden;
-  width: 0;
-  animation: typing 3s steps(30, end) forwards, blink 0.7s infinite;
-}
-@keyframes typing { to { width: 100%; } }
-@keyframes blink { 50% { border-color: transparent; } }
-
-/* slideshow */
-img {
-  width: 250px;
-  border-radius: 15px;
-  margin-top: 20px;
+  transition: 0.3s;
 }
 
-/* hearts */
-.heart {
+.primary {
+  background: #ff4d6d;
+  color: white;
+}
+.primary:hover {
+  transform: scale(1.1);
+}
+
+.yes {
+  background: #28a745;
+  color: white;
+}
+.no {
+  background: #dc3545;
+  color: white;
   position: absolute;
-  width: 20px;
-  height: 20px;
-  background: red;
-  transform: rotate(45deg);
-  animation: float 5s linear infinite;
 }
-.heart::before, .heart::after {
-  content: "";
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  background: red;
-  border-radius: 50%;
-}
-.heart::before { top: -10px; }
-.heart::after { left: 10px; }
 
-@keyframes float {
-  0% { transform: translateY(0) rotate(45deg); opacity:1; }
-  100% { transform: translateY(-800px) rotate(45deg); opacity:0; }
+/* smooth fade */
+.fade {
+  animation: fade 0.8s ease;
+}
+@keyframes fade {
+  from {opacity:0; transform: translateY(20px);}
+  to {opacity:1; transform: translateY(0);}
 }
 
 /* confetti */
 .confetti {
   position: absolute;
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   top: 0;
   animation: fall 3s linear infinite;
 }
@@ -104,108 +96,67 @@ img {
 
 <body>
 
-<!-- MUSIC -->
-<audio autoplay loop>
-  <source src="your-music.mp3" type="audio/mpeg">
-</audio>
-
-<!-- SCREEN 1 -->
-<div id="s1" class="screen visible">
-  <h1>Hey Love ❤️</h1>
-  <button onclick="next(1)">Start</button>
-</div>
-
-<!-- STORY -->
-<div id="s2" class="screen hidden">
-  <p class="typing">From the moment I met you...</p>
-  <button onclick="next(2)">Next</button>
-</div>
-
-<div id="s3" class="screen hidden">
-  <p class="typing">Everything changed in the most beautiful way 💕</p>
-  <button onclick="next(3)">Next</button>
-</div>
-
-<!-- PHOTO SLIDESHOW -->
-<div id="s4" class="screen hidden">
-  <h1>Our Moments 📸</h1>
-  <img id="photo" src="photo1.jpg">
-  <button onclick="next(4)">Next</button>
-</div>
-
-<!-- FINAL BUILDUP -->
-<div id="s5" class="screen hidden">
-  <p class="typing">And today I want to ask you something...</p>
-  <button onclick="showProposal()">See</button>
-</div>
-
-<!-- PROPOSAL -->
-<div id="proposal" class="screen hidden">
-  <h1>Will you be mine forever? 💍</h1>
-  <button class="yes" onclick="yesClicked()">YES ❤️</button>
-  <button class="no" id="noBtn">NO 😜</button>
-</div>
-
-<!-- FINAL SUCCESS -->
-<div id="final" class="screen hidden">
-  <h1>YAYYYY ❤️🎉</h1>
-  <p>You just made me the happiest person alive 😘</p>
+<div id="app" class="card fade">
+  <h1 id="title">Hey ❤️</h1>
+  <p id="text">I made something special for you</p>
+  <button class="primary" onclick="next()">Start</button>
 </div>
 
 <script>
-let photos = ["photo1.jpg","photo2.jpg","photo3.jpg"];
-let index = 0;
+let step = 0;
 
-// screen navigation
-function next(n){
-  document.getElementById("s"+n).classList.replace("visible","hidden");
-  document.getElementById("s"+(n+1)).classList.replace("hidden","visible");
-  createHearts(10);
+const story = [
+  ["From the moment I met you 💕","Everything felt different..."],
+  ["You make my world brighter ✨","Every day with you is special"],
+  ["I cherish every moment 💖","And I want many more..."],
+  ["So here it is... 💍","Something I’ve been wanting to ask"]
+];
+
+function next(){
+  const app = document.getElementById("app");
+
+  if(step < story.length){
+    app.classList.remove("fade");
+    void app.offsetWidth;
+
+    document.getElementById("title").innerText = story[step][0];
+    document.getElementById("text").innerText = story[step][1];
+
+    app.classList.add("fade");
+    step++;
+  } else {
+    showProposal();
+  }
 }
 
-// slideshow
-setInterval(()=>{
-  let img = document.getElementById("photo");
-  if(img){
-    index = (index+1)%photos.length;
-    img.src = photos[index];
-  }
-},2000);
-
-// proposal screen
 function showProposal(){
-  document.getElementById("s5").classList.replace("visible","hidden");
-  document.getElementById("proposal").classList.replace("hidden","visible");
+  const app = document.getElementById("app");
+
+  app.innerHTML = `
+    <h1>Will you be mine forever? 💍</h1>
+    <button class="yes" onclick="yes()">YES ❤️</button>
+    <button class="no" id="noBtn">NO 😜</button>
+  `;
+
+  const noBtn = document.getElementById("noBtn");
+  noBtn.onmouseover = () => {
+    noBtn.style.top = Math.random()*80 + "%";
+    noBtn.style.left = Math.random()*80 + "%";
+  };
 }
 
-// YES
-function yesClicked(){
-  document.getElementById("proposal").classList.replace("visible","hidden");
-  document.getElementById("final").classList.replace("hidden","visible");
-  createConfetti(100);
+function yes(){
+  const app = document.getElementById("app");
+
+  app.innerHTML = `
+    <h1>YAYYYY ❤️🎉</h1>
+    <p>You just made me the happiest person alive 😘</p>
+  `;
+
+  confetti(80);
 }
 
-// NO button runs away 😂
-let noBtn = document.getElementById("noBtn");
-noBtn.addEventListener("mouseover", ()=>{
-  noBtn.style.top = Math.random()*80 + "%";
-  noBtn.style.left = Math.random()*80 + "%";
-});
-
-// hearts
-function createHearts(n){
-  for(let i=0;i<n;i++){
-    let h = document.createElement("div");
-    h.className="heart";
-    h.style.left=Math.random()*window.innerWidth+"px";
-    h.style.animationDuration=3+Math.random()*5+"s";
-    document.body.appendChild(h);
-    setTimeout(()=>h.remove(),5000);
-  }
-}
-
-// confetti
-function createConfetti(n){
+function confetti(n){
   for(let i=0;i<n;i++){
     let c=document.createElement("div");
     c.className="confetti";
